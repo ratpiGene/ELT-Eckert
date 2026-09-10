@@ -83,7 +83,15 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
-      - run: pip install "apache-airflow==2.10.5" -r requirements.txt
+      # Airflow s'installe avec son fichier de contraintes officiel, pour éviter
+      # tout conflit de résolution avec les versions applicatives. L'import des
+      # DAG ne nécessite que `requests` (le reste des dépendances est chargé à
+      # l'exécution des tâches, pas au parsing).
+      - name: Installation d'Airflow (contraintes officielles)
+        run: |
+          pip install "apache-airflow==2.10.5" \
+            --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.10.5/constraints-3.11.txt"
+          pip install requests
       - name: Import des DAG sans erreur
         env:
           AIRFLOW__CORE__LOAD_EXAMPLES: "false"
