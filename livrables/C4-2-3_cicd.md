@@ -46,7 +46,7 @@ qualite     tests        securite          (intégration, en parallèle)
 | **tests** | Cahier de recette automatisé | `pytest` + couverture, rapport JUnit archivé | Intégration |
 | **securite** | Vulnérabilités + secrets | `pip-audit --strict`, contrôle qu'aucun `.env` n'est versionné | Intégration / **sécurité** |
 | **dags** | Import des DAG sans erreur | Airflow (contraintes officielles) + `dags list-import-errors` | Intégration |
-| **deploiement** | Construction et vérification de l'image | `docker build`, run de vérification, résumé de version | **Déploiement** |
+| **deploiement** | **Publication de l'image sur un registre** + vérification | `docker build` → **push GHCR** → **pull** + smoke test | **Déploiement** |
 
 ### 2.1 Intégration
 
@@ -63,13 +63,24 @@ qualite     tests        securite          (intégration, en parallèle)
 ### 2.2 Déploiement
 
 Le job `deploiement` ne s'exécute que sur `push` vers `main`, après succès de `dags` et
-`securite`. Il **construit l'image applicative** (`infra/Dockerfile`), **vérifie qu'elle
-démarre** (`python -c "import eckert"`), et journalise la version (SHA) dans le résumé du run.
+`securite`. Il réalise un **déploiement continu réel** de l'artefact :
 
-**Limite assumée** (`LIMITES.md`) : le déploiement s'arrête à la construction et à la
-vérification de l'image. Il n'y a pas d'environnement cible exposé depuis un runner public, ni
-de secret de déploiement dans le dépôt public — le déploiement effectif vers un environnement
-joignable est décrit comme évolution.
+1. **construit** l'image applicative (`infra/Dockerfile`, exécutée sans privilèges) ;
+2. **publie** l'image sur le **GitHub Container Registry** (`ghcr.io/ratpigene/eckert-elt`),
+   taguée par **SHA de commit** et `latest`, authentifié par le `GITHUB_TOKEN` intégré (aucun
+   secret externe, permission `packages: write`) ;
+3. **vérifie le déploiement** en **retéléchargeant l'image depuis le registre** (aller-retour
+   réel) puis en exécutant un smoke test (`import eckert`) ;
+4. journalise la référence publiée (image + tag + registre) dans le résumé du run.
+
+L'image publiée est donc **récupérable et exécutable par tout consommateur** (un serveur, un
+`docker compose pull`, un orchestrateur), ce qui constitue un déploiement d'artefact au sens
+propre.
+
+**Limite assumée** (`LIMITES.md`) : le pipeline publie et vérifie l'artefact, mais ne réalise pas
+la **mise en service automatique sur un environnement d'exécution cible** (aucun cluster de
+production exposé depuis un runner public). La bascule `pull` → run sur un hôte cible est une
+étape d'exploitation décrite comme évolution.
 
 ---
 
@@ -105,7 +116,7 @@ et logs : **onglet Actions du dépôt**.
 | Critère de la grille | Section | Preuve |
 |---|---|---|
 | Pipeline automatisant l'**intégration** | §2.1 | `.github/workflows/ci.yml`, run vert |
-| Pipeline automatisant le **déploiement** | §2.2 | job `deploiement` (build image) |
+| Pipeline automatisant le **déploiement** | §2.2 | job `deploiement` : image publiée sur GHCR + vérifiée par pull (`preuves/C4-2-3_deploiement_ghcr.png`) |
 | **Fichier de workflow** fourni | §1 | `.github/workflows/ci.yml` |
 | **Capture d'une exécution réelle** | §4 | `preuves/C4-2-3_ci_run_vert.png` |
 | Contrôles de **sécurité** intégrés | §3 | `preuves/C4-2-3_pip_audit.txt` |

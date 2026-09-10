@@ -104,17 +104,46 @@ jobs:
           if grep -q "Traceback" erreurs.txt; then exit 1; fi
 
   deploiement:
-    name: Déploiement
+    name: Déploiement (image sur GHCR)
     runs-on: ubuntu-latest
     needs: [dags, securite]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write          # publier l'image sur le registre GitHub
+    env:
+      # GHCR impose un nom en minuscules.
+      IMAGE: ghcr.io/ratpigene/eckert-elt
     steps:
       - uses: actions/checkout@v4
+
+      - name: Connexion au registre GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Construction de l'image applicative
-        run: docker build -f infra/Dockerfile -t eckert-elt:${{ github.sha }} .
-      - name: Vérification de démarrage de l'image
-        run: docker run --rm eckert-elt:${{ github.sha }} python -c "import eckert; print('image operationnelle')"
-      - name: Étiquetage de la version déployée
+        run: docker build -f infra/Dockerfile -t "$IMAGE:${{ github.sha }}" -t "$IMAGE:latest" .
+
+      - name: Publication sur le registre (déploiement de l'artefact)
         run: |
-          echo "Version déployée : ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "Déclenché par : ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          docker push "$IMAGE:${{ github.sha }}"
+          docker push "$IMAGE:latest"
+
+      - name: Vérification par pull depuis le registre + smoke test
+        run: |
+          # On supprime les images locales pour forcer un vrai aller-retour registre.
+          docker image rm "$IMAGE:${{ github.sha }}" "$IMAGE:latest" || true
+          docker pull "$IMAGE:${{ github.sha }}"
+          docker run --rm "$IMAGE:${{ github.sha }}" \
+            python -c "import eckert; print('image déployée opérationnelle depuis GHCR')"
+
+      - name: Résumé du déploiement
+        run: |
+          echo "### Déploiement réussi" >> $GITHUB_STEP_SUMMARY
+          echo "- Image publiée : \`$IMAGE:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Également taguée : \`$IMAGE:latest\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Registre : GitHub Container Registry (ghcr.io)" >> $GITHUB_STEP_SUMMARY
+          echo "- Déclenché par : ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
