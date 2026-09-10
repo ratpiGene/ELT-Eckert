@@ -1,0 +1,4 @@
+# C4.2.3 / C4.4.1 — Scan de vulnérabilités des dépendances
+# venv local + CI (job securite) — pip-audit --strict
+
+No known vulnerabilities found

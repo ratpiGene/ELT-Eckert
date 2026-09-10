@@ -12,3 +12,6 @@ crédible. Chaque entrée est un choix, pas un oubli — et se dit à l'oral.
 | Déploiement continu limité à la construction et au contrôle de l'image | Pas d'environnement cible exposé depuis un runner public | Un environnement de recette joignable et un secret de déploiement |
 | Référentiel adhérents synthétique | Aucune donnée réelle ne peut ni ne doit sortir de l'entreprise | Rien : c'est une limite définitive et volontaire |
 | Volumétrie de démonstration inférieure à une production réelle | Contrainte du poste de travail | Un cluster dimensionné |
+| Job Spark **soumis manuellement** (`spark-submit`), non déclenché par Airflow | L'image Airflow ne contient pas `spark-submit` ; l'ajouter alourdissait le Compose sur le délai | `SparkSubmitOperator` + connexion Spark, ou un `DockerOperator` |
+| Image Spark `bitnamilegacy/spark:3.5.3` | Bitnami a retiré les tags non-`latest` de `bitnami/*` en 2025 ; le namespace `bitnamilegacy` est figé mais fonctionnel | Bascule vers l'image officielle `apache/spark` (commandes master/worker explicites) |
+| Rapprochement démontré sur un **fichier décès synthétique à recouvrement contrôlé** | Les identités du vrai fichier INSEE ne recoupent pas le référentiel synthétique | Un référentiel dérivé en partie du fichier réel, ou un pivot d'identité |

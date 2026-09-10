@@ -1,0 +1,16 @@
+======================================================================
+C4.4.2 — REJEU DE L INCIDENT : validation par le CONTENU
+======================================================================
+
+[CAS INCIDENT] Fichier sain, metadonnees absentes cote producteur :
+   -> CONFORME — deces-sans-metadonnees.txt : 1050 lignes lues, 0 rejetées (0.00%)
+   -> conforme=True | ALERTE non bloquante : Le producteur ne publie plus les métadonnées suivantes : filesize, checksum. Validation assurée par le contenu du fichier.
+
+[CAS DEGRADE] 30 lignes tronquees :
+   -> NON CONFORME — deces-tronque.txt : 1030 lignes lues, 30 rejetées (2.91%) | motifs={'longueur_insuffisante': 30}
+
+[CAS DEGRADE] Dates de deces impossibles :
+   -> motifs={'date_deces_invalide': 5}
+
+[CAS BLOQUANT] Taux de rejet > seuil (fichier corrompu) :
+   -> NON CONFORME — deces-corrompu.txt : 1300 lignes lues, 300 rejetées (23.08%) | BLOQUANT=['taux de rejet 23.08% au-dessus du seuil 2%']
