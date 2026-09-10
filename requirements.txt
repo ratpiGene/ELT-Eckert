@@ -1,0 +1,17 @@
+# Ingestion & validation
+requests==2.32.3
+python-dotenv==1.0.1
+boto3==1.35.36
+
+# Entrepôt
+psycopg[binary]==3.2.3
+sqlalchemy==2.0.36
+
+# Référentiel synthétique
+faker==30.8.2
+
+# Qualité / tests
+pytest==8.3.3
+pytest-cov==5.0.0
+ruff==0.7.4
+pip-audit==2.7.3

@@ -1,0 +1,112 @@
+# ---------------------------------------------------------------------------
+# C4.2.3 — Intégration et déploiement continus
+#
+#  Intégration : qualité de code, tests unitaires et structurels, sécurité des
+#                dépendances, validation du chargement des DAG Airflow.
+#  Déploiement : construction et publication de l'image applicative sur la
+#                branche main, puis déclenchement du déploiement.
+# ---------------------------------------------------------------------------
+name: CI/CD ELT Eckert
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  qualite:
+    name: Qualité de code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install ruff==0.7.4
+      - name: Analyse statique
+        run: ruff check src tests dags
+      - name: Contrôle de format
+        run: ruff format --check src tests dags
+
+  tests:
+    name: Tests unitaires et structurels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Exécution du cahier de recette automatisé
+        env:
+          PYTHONPATH: src
+        run: pytest tests -v --cov=src/eckert --cov-report=term-missing --junitxml=rapport-tests.xml
+      - name: Publication du rapport de tests
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapport-tests
+          path: rapport-tests.xml
+
+  securite:
+    name: Sécurité des dépendances
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install pip-audit==2.7.3
+      - name: Recherche de vulnérabilités connues
+        run: pip-audit --requirement requirements.txt --strict
+      - name: Vérification qu'aucun secret n'est versionné
+        run: |
+          if git ls-files | grep -E '(^|/)\.env$'; then
+            echo "::error::un fichier .env est versionné"; exit 1
+          fi
+          echo "aucun fichier .env versionné"
+
+  dags:
+    name: Validation des DAG Airflow
+    runs-on: ubuntu-latest
+    needs: [qualite, tests]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install "apache-airflow==2.10.5" -r requirements.txt
+      - name: Import des DAG sans erreur
+        env:
+          AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+          AIRFLOW_HOME: ${{ github.workspace }}/.airflow
+          PYTHONPATH: src
+        run: |
+          airflow db migrate
+          cp -r dags "$AIRFLOW_HOME/dags"
+          airflow dags list-import-errors 2>&1 | tee erreurs.txt
+          if grep -q "Traceback" erreurs.txt; then exit 1; fi
+
+  deploiement:
+    name: Déploiement
+    runs-on: ubuntu-latest
+    needs: [dags, securite]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construction de l'image applicative
+        run: docker build -f infra/Dockerfile -t eckert-elt:${{ github.sha }} .
+      - name: Vérification de démarrage de l'image
+        run: docker run --rm eckert-elt:${{ github.sha }} python -c "import eckert; print('image operationnelle')"
+      - name: Étiquetage de la version déployée
+        run: |
+          echo "Version déployée : ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "Déclenché par : ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
