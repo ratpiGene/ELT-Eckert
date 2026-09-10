@@ -12,6 +12,10 @@ x-airflow-common: &airflow-common
     AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "false"
     PYTHONPATH: /opt/airflow/src
+    # L'image Airflow standard ne contient pas nos dépendances applicatives.
+    # psycopg est requis par les tâches qui journalisent et écrivent en base.
+    # (Installé au démarrage du conteneur ; suffisant pour ce contexte local.)
+    _PIP_ADDITIONAL_REQUIREMENTS: "psycopg[binary]==3.2.3"
     # Connexion entrepôt + stockage objet, lues par le code applicatif
     ELT_PG_DSN: postgresql://elt_writer:${ELT_WRITER_PASSWORD}@postgres:5432/eckert
     MINIO_ENDPOINT: ${MINIO_ENDPOINT}

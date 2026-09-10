@@ -18,15 +18,14 @@ Une preuve par critère, rattachée à sa compétence. Deux natures :
 | C4.2.1 | Restitution métier lue par `elt_reader` | `preuves/C4-2-1_vue_restitution.txt` | ✅ [texte] |
 | C4.2.2 | Résultats gold par niveau de confiance | `preuves/C4-2-2_gold_par_confiance.txt` | ✅ [texte] |
 | C4.2.2 | Exécution du job Spark (cluster) | `preuves/C4-2-2_spark_execution.txt` | ✅ [texte] |
-| C4.2.2 | Spark UI (application sur le master) | `preuves/C4-2-2_spark_ui.png` | ⏳ [capture] http://localhost:8081 |
-| C4.2.2 | DAG Airflow (graphe) | `preuves/C4-2-2_airflow_dag.png` | ⏳ [capture] http://localhost:8080 |
-| C4.2.2 | DAG Airflow (exécution verte) | `preuves/C4-2-2_airflow_run.png` | ⏳ [capture] |
-| C4.2.2 | Fil de l'eau bronze → silver (compteurs) | `preuves/C4-2-2_bronze_silver.txt` | ⏳ [texte] à générer |
+| C4.2.2 | Spark UI (application `eckert-rapprochement` FINISHED) | `preuves/C4-2-2_spark_ui.png` | ✅ [capture] |
+| C4.2.2 | DAG Airflow démo (exécution verte) | `preuves/C4-2-2_airflow_demo_vert.png` | ⏳ [capture] Grid de `eckert_demo_offline` |
+| C4.2.2 | Fil de l'eau bronze → silver (compteurs) | `preuves/C4-2-2_bronze_silver.txt` | ✅ [texte] |
 | C4.2.3 | CI/CD verte (jobs) | `preuves/C4-2-3_ci_jobs.txt` | ✅ [texte] |
-| C4.2.3 | CI/CD verte (capture) | `preuves/C4-2-3_ci_run_vert.png` | ⏳ [capture] onglet Actions |
+| C4.2.3 | CI/CD verte (capture, run #4 Success) | `preuves/C4-2-3_ci_run_vert.png` | ✅ [capture] |
 | C4.2.3 | Scan de dépendances | `preuves/C4-2-3_pip_audit.txt` | ✅ [texte] |
 | C4.3.1 | Airflow Grid view | `preuves/C4-3-1_airflow_grid.png` | ⏳ [capture] |
-| C4.3.1 | Journal d'exécution `ops` | `preuves/C4-3-1_journal_ops.txt` | ⏳ [texte] à générer |
+| C4.3.1 | Journal d'exécution `ops` | `preuves/C4-3-1_journal_ops.txt` | ✅ [texte] |
 | C4.3.1 | Alerte sur échec provoqué | `preuves/C4-3-1_alerte_echec.png` | ⏳ [capture] |
 | C4.4.1 | Cahier de recette exécuté (19 tests) | `preuves/C4-4-1_recette_complete.txt` | ✅ [texte] |
 | C4.4.1 | Tests de sécurité (base réelle) | `preuves/C4-4-1_tests_securite.txt` | ✅ [texte] |

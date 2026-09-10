@@ -1,0 +1,9 @@
+# C4.3.1 — Journal de supervision (ops.journal_execution)
+# 2026-09-10T20:20:29Z
+
+              run_id               |       etape       | statut | lignes_lues | lignes_rejetees |          horodatage           
+-----------------------------------+-------------------+--------+-------------+-----------------+-------------------------------
+ manual__2026-09-10T20:18:25+00:00 | promouvoir_silver | SUCCES |        4240 |                 | 2026-09-10 20:18:29.487914+00
+ manual__2026-09-10T20:18:25+00:00 | charger_bronze    | SUCCES |        4240 |                 | 2026-09-10 20:18:27.279556+00
+(2 rows)
+

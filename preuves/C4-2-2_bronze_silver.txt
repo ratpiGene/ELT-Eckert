@@ -1,0 +1,9 @@
+# C4.2.2 — Traitement au fil de l'eau : bronze -> silver (DAG eckert_demo_offline)
+# 2026-09-10T20:20:29Z
+
+       etape       | statut | lignes_lues 
+-------------------+--------+-------------
+ promouvoir_silver | SUCCES |        4240
+ charger_bronze    | SUCCES |        4240
+(2 rows)
+
