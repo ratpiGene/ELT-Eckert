@@ -6,5 +6,8 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname eckert <<-EOSQL
     CREATE ROLE elt_writer LOGIN PASSWORD '${ELT_WRITER_PASSWORD}';
     CREATE ROLE elt_reader LOGIN PASSWORD '${ELT_READER_PASSWORD}';
 EOSQL
+# Extension de normalisation utilisée par la promotion silver (droit réservé au superuser).
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname eckert -c "CREATE EXTENSION IF NOT EXISTS unaccent;"
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname eckert -f /sql/10_schemas.sql
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname eckert -f /sql/20_tables.sql
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname eckert -f /sql/30_vues_gold.sql

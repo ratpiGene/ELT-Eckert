@@ -128,7 +128,7 @@ services:
 
   # --- Calculs distribués --------------------------------------------------
   spark-master:
-    image: bitnami/spark:3.5.3
+    image: bitnamilegacy/spark:3.5.3
     container_name: eckert-spark-master
     environment:
       SPARK_MODE: master
@@ -142,7 +142,7 @@ services:
       - ../data:/opt/app/data
 
   spark-worker:
-    image: bitnami/spark:3.5.3
+    image: bitnamilegacy/spark:3.5.3
     container_name: eckert-spark-worker
     environment:
       SPARK_MODE: worker

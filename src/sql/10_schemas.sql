@@ -18,6 +18,10 @@ CREATE SCHEMA IF NOT EXISTS ops;      -- journal technique, qualité, supervisio
 GRANT USAGE, CREATE ON SCHEMA bronze, silver, gold, ops TO elt_writer;
 ALTER DEFAULT PRIVILEGES IN SCHEMA bronze, silver, gold, ops
     GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO elt_writer;
+-- Les colonnes BIGSERIAL (bronze.deces_brut, silver.deces) s'appuient sur des
+-- séquences : l'écriture par COPY/INSERT exige USAGE sur ces séquences.
+ALTER DEFAULT PRIVILEGES IN SCHEMA bronze, silver, gold, ops
+    GRANT USAGE, SELECT ON SEQUENCES TO elt_writer;
 
 -- Lecture : la restitution métier, sur gold seulement
 GRANT USAGE ON SCHEMA gold TO elt_reader;

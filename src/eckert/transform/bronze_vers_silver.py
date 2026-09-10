@@ -31,7 +31,10 @@ SELECT DISTINCT ON (cle_naturelle)
     nom, prenoms, sexe, date_naissance, code_lieu_naissance,
     commune_naissance, pays_naissance, date_deces, code_lieu_deces,
     numero_acte_deces,
-    upper(unaccent(nom)) || '|' || upper(unaccent(split_part(prenoms, ' ', 1)))
+    -- Clé normalisée à l'identique de eckert.referentiel.generate.cle_rapprochement :
+    -- majuscules, sans accents, lettres A-Z uniquement, sur nom + premier prénom.
+    regexp_replace(upper(unaccent(nom)), '[^A-Z]', '', 'g') || '|'
+        || regexp_replace(upper(unaccent(split_part(prenoms, ' ', 1))), '[^A-Z]', '', 'g')
         || '|' || to_char(date_naissance, 'YYYYMMDD') AS cle_rapprochement,
     fichier_source
 FROM (

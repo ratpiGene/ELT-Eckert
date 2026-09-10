@@ -3,8 +3,8 @@
 #
 #  Intégration : qualité de code, tests unitaires et structurels, sécurité des
 #                dépendances, validation du chargement des DAG Airflow.
-#  Déploiement : construction et publication de l'image applicative sur la
-#                branche main, puis déclenchement du déploiement.
+#  Déploiement : construction et vérification de l'image applicative sur la
+#                branche main.
 # ---------------------------------------------------------------------------
 name: CI/CD ELT Eckert
 

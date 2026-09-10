@@ -29,3 +29,9 @@ webserver_config.py
 .idea/
 .vscode/
 .DS_Store
+
+# Brouillons de travail
+Claude outputs/
+rapport-tests.xml
+.coverage
+htmlcov/
