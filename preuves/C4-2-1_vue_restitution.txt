@@ -1,0 +1,16 @@
+# C4.2.1 — Restitution métier : lecture de la vue par le rôle elt_reader (lecture seule)
+
+ priorite |    nom     |  prenoms  | niveau_confiance | jours_depuis_deces | capital_garanti 
+----------+------------+-----------+------------------+--------------------+-----------------
+        1 | PERROT     | Lorraine  | CERTAIN          |               1500 |        42202.13
+        2 | HOAREAU    | Zacharie  | CERTAIN          |               1500 |        39814.87
+        3 | HOAREAU    | Zacharie  | CERTAIN          |               1500 |        20553.00
+        4 | MARTINEAU  | Laure     | CERTAIN          |               1499 |        35649.82
+        5 | POIRIER    | Alexandre | CERTAIN          |               1497 |        46450.40
+        6 | POIRIER    | Alexandre | CERTAIN          |               1497 |        30671.08
+        7 | RENAULT    | Georges   | CERTAIN          |               1496 |         9159.90
+        8 | CARPENTIER | Denise    | CERTAIN          |               1495 |        51262.45
+        9 | BOUVET     | Nicolas   | CERTAIN          |               1495 |        13559.79
+       10 | FERNANDES  | Olivier   | CERTAIN          |               1491 |        50980.30
+(10 rows)
+

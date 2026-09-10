@@ -1,0 +1,53 @@
+# C4.2.1 — Schémas, rôles et tables de l'entrepôt eckert
+# Généré le 2026-09-10T19:42:12Z — docker exec eckert-postgres psql
+
+      List of schemas
+  Name  |       Owner       
+--------+-------------------
+ bronze | postgres
+ gold   | postgres
+ ops    | postgres
+ public | pg_database_owner
+ silver | postgres
+(5 rows)
+
+                              List of roles
+ Role name  |                         Attributes                         
+------------+------------------------------------------------------------
+ elt_reader | 
+ elt_writer | 
+ postgres   | Superuser, Create role, Create DB, Replication, Bypass RLS
+
+           List of relations
+ Schema |    Name    | Type  |  Owner   
+--------+------------+-------+----------
+ bronze | deces_brut | table | postgres
+(1 row)
+
+          List of relations
+ Schema |   Name   | Type  |  Owner   
+--------+----------+-------+----------
+ silver | adherent | table | postgres
+ silver | contrat  | table | postgres
+ silver | deces    | table | postgres
+(3 rows)
+
+               List of relations
+ Schema |        Name        | Type  |  Owner   
+--------+--------------------+-------+----------
+ gold   | contrat_desherence | table | postgres
+(1 row)
+
+                 List of relations
+ Schema |          Name          | Type |  Owner   
+--------+------------------------+------+----------
+ gold   | v_contrats_a_instruire | view | postgres
+(1 row)
+
+               List of relations
+ Schema |       Name        | Type  |  Owner   
+--------+-------------------+-------+----------
+ ops    | controle_qualite  | table | postgres
+ ops    | journal_execution | table | postgres
+(2 rows)
+

@@ -1,0 +1,10 @@
+# C4.2.2 — Résultats du rapprochement distribué (gold.contrat_desherence)
+# run_id=demo_local_001 — 2026-09-10T19:42:12Z
+
+ niveau_confiance | contrats | capital_total_eur 
+------------------+----------+-------------------
+ A_VERIFIER       |       57 |           1973324
+ CERTAIN          |     2846 |          88076469
+ PROBABLE         |     1259 |          38375767
+(3 rows)
+

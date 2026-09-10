@@ -107,7 +107,9 @@ def generer(
         compte["CERTAIN" if certain else "PROBABLE"] += 1
 
     for adherent in candidats_homonymes:
-        autre_prenom = faker.first_name_male() if adherent["sexe"] == "1" else faker.first_name_female()
+        autre_prenom = (
+            faker.first_name_male() if adherent["sexe"] == "1" else faker.first_name_female()
+        )
         if autre_prenom.upper() == adherent["prenoms"].upper():
             autre_prenom += "BIS"
         lignes.append(

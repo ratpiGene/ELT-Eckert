@@ -1,0 +1,10 @@
+# C4.2.2 — Exécution du job Spark de rapprochement sur le cluster (spark://spark-master:7077)
+# Commande : spark-submit --master spark://spark-master:7077 --packages org.postgresql:postgresql:42.7.4 rapprochement.py --run-id demo_local_001
+
+============================================================
+Rapprochement demo_local_001 — 4162 contrats potentiellement en déshérence
+  CERTAIN     : 2846
+  PROBABLE    : 1259
+  A_VERIFIER  : 57
+============================================================
+Écrit dans gold.contrat_desherence (run_id=demo_local_001).

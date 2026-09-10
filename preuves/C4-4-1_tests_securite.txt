@@ -1,0 +1,13 @@
+# C4.4.1 — Tests de sécurité exécutés contre l'entrepôt réel
+# 2026-09-10T19:42:34Z
+
+============================= test session starts =============================
+collecting ... collected 5 items
+
+tests/test_securite.py::test_aucun_env_versionne PASSED                  [ 20%]
+tests/test_securite.py::test_gitignore_couvre_les_secrets PASSED         [ 40%]
+tests/test_securite.py::test_pas_de_mot_de_passe_en_dur_dans_le_code PASSED [ 60%]
+tests/test_securite.py::test_reader_ne_peut_pas_ecrire_en_gold PASSED    [ 80%]
+tests/test_securite.py::test_reader_ne_voit_pas_le_bronze PASSED         [100%]
+
+============================== 5 passed in 0.44s ==============================
