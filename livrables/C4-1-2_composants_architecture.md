@@ -118,30 +118,42 @@ services managés propriétaires, précisément pour préserver la réversibilit
 
 ### 5.2 Scénario 1 — Local / on-premise conteneurisé *(solution retenue)*
 
-| Poste | Coût |
-|---|---|
-| Logiciel (Airflow, Postgres, MinIO, Spark, GitHub Actions publics) | **0 €** (open source) |
-| Infrastructure | **Serveur existant** — pas d'acquisition dédiée |
-| Exploitation humaine | Coût principal : ~ **0,5 j-homme / mois** (surveillance, rejeux, MCO) |
-| **Total mensuel récurrent** | **≈ coût du temps humain seul** |
+Le logiciel est gratuit et le serveur existe déjà : le coût réel est le **temps humain**. Il faut
+donc le chiffrer, et non le déclarer « nul ».
 
-**Avantage** : coût marginal quasi nul, maîtrise totale, aucune donnée hors périmètre.
+*Hypothèse de coût humain* : coût chargé d'un **alternant Master 2** ≈ **1 600 €/mois**, soit
+≈ **90 €/jour** ouvré (les charges d'un contrat d'apprentissage sont largement exonérées, le coût
+employeur reste proche du brut).
+
+| Poste | Hypothèse | Coût |
+|---|---|---|
+| Logiciel (Airflow, Postgres, MinIO, Spark, GitHub Actions publics) | open source | **0 €** |
+| Infrastructure | serveur interne existant (électricité négligeable) | **~ 0 €** |
+| **Construction** (une fois) | ~ 15 j-homme × 90 € | **≈ 1 350 €** (amorti : ~ 37 €/mois sur 3 ans) |
+| **Exploitation** (récurrent) | ~ 0,5 j-homme/mois (surveillance, rejeux, MCO) | **≈ 45 €/mois** |
+| **Total mensuel récurrent** | exploitation seule → tout amorti | **≈ 45 à 82 €/mois** |
+
+**Avantage** : pas de coût d'infrastructure, maîtrise totale, aucune donnée hors périmètre.
 **Limite** : pas de scalabilité horizontale ni de haute disponibilité native (assumé, `LIMITES.md`).
 
 ### 5.3 Scénario 2 — Cloud managé Azure
 
-Hypothèse d'implémentation équivalente : Azure Data Factory (orchestration), Blob Storage
-(bronze), Azure Database for PostgreSQL Flexible Server (entrepôt), Azure Container Instances
-ou un petit cluster Databricks pour le distribué.
+Implémentation équivalente : Azure Data Factory (orchestration), Blob Storage (bronze), Azure
+Database for PostgreSQL Flexible Server (entrepôt), un cluster Databricks éphémère pour le
+distribué. Prix publics pay-as-you-go, région Europe (arrondis, hors remises).
 
-| Poste | Hypothèse | Ordre de grandeur mensuel |
-|---|---|---|
-| Orchestration (Data Factory) | ~ quelques dizaines d'exécutions d'activités / mois | **5 – 15 €** |
-| Stockage (Blob, ~ 10 Go, chaud) | 10 Go + opérations | **1 – 5 €** |
-| Entrepôt (PostgreSQL Flexible, B-series, arrêté hors traitement) | 1 instance burstable | **30 – 80 €** |
-| Calcul distribué (Databricks job cluster, quelques min/mois) | cluster éphémère à la demande | **10 – 40 €** |
-| Réseau / sortie de données | faible | **~ 5 €** |
-| **Total mensuel** | ordre de grandeur | **≈ 50 – 145 € / mois** |
+| Poste | Ressource / SKU | Hypothèse | €/mois |
+|---|---|---|---|
+| Entrepôt | PostgreSQL Flexible **Burstable B1ms** (1 vCore, 2 Gio) | arrêt possible hors traitement | **~ 13** |
+| Stockage entrepôt | 32 Go + sauvegardes | | **~ 4** |
+| Orchestration | Data Factory | ~ 1 exécution/mois, quelques activités | **1 – 5** |
+| Stockage brut | Blob Storage 10 Go (chaud) | + opérations | **1 – 2** |
+| Calcul distribué | Databricks **job cluster** éphémère | quelques min/mois | **10 – 30** |
+| Réseau | sortie de données | faible | **~ 3** |
+| **Total** | | | **≈ 30 – 55 €/mois** |
+
+> Une instance **B2s** (2 vCore/4 Gio, ~ **46 €/mois** de compute) porterait le total à
+> **≈ 65 – 90 €/mois** si l'entrepôt doit rester allumé en permanence.
 
 **Avantage** : haute disponibilité, scalabilité, exploitation déléguée.
 **Limite** : coût récurrent, exposition d'un budget, gouvernance des accès cloud à outiller.
@@ -149,28 +161,48 @@ ou un petit cluster Databricks pour le distribué.
 ### 5.4 Scénario 3 — Plateforme SaaS (Snowflake / Microsoft Fabric)
 
 Ce scénario **reprend l'étude réelle menée en année 2 chez Prévifrance** (architecture cible
-Snowflake / Airflow, **maquettée, testée, non retenue**).
+Snowflake / Airflow, **maquettée, testée, non retenue**). Deux modèles de facturation opposés :
 
-| Poste | Hypothèse | Ordre de grandeur mensuel |
+**Snowflake — facturation à l'usage (crédits) :**
+
+| Poste | Hypothèse | €/mois |
 |---|---|---|
-| Entrepôt SaaS (crédits de calcul) | usage intermittent, warehouse XS, auto-suspend | **50 – 150 €** (très sensible à l'usage) |
-| Stockage | ~ 10 Go compressés | **quelques € |
-| Ingestion / orchestration managée | pipelines natifs ou Airflow externe | **variable** |
-| **Total mensuel** | fortement dépendant de l'usage | **≈ 80 – 250 € / mois** |
+| Calcul | édition Standard ≈ **2,50 €/crédit** (Europe) · warehouse **XS** = 1 crédit/h · auto-suspend · ~ 15–30 crédits/mois | **≈ 40 – 75** |
+| Stockage | ~ 10 Go compressés (~ 23 €/To/mois) | **< 1** |
+| **Total** | très sensible à l'usage | **≈ 40 – 80 €/mois** |
 
-**Raison documentée du non-retenu (contexte réel, année 2)** : l'arbitrage a été rendu **contre**
-la bascule SaaS pour un faisceau de raisons — **coût récurrent** au regard d'un besoin mensuel à
-faible intensité, **gouvernance des données** (données de santé et d'identité, sensibilité à la
-localisation et à la sortie du SI maîtrisé), **maturité des équipes** sur l'existant SQL Server,
-et **absence de gain décisif** sur une volumétrie que l'existant absorbait déjà. La décision a
-été prise collégialement (équipe data + DBA *gatekeeper*), sur critères de coût / valeur /
-souveraineté. C'est le **matériau direct** de la question de jury sur le vendor lock-in.
+**Microsoft Fabric — facturation à la capacité :**
+
+| Poste | Hypothèse | €/mois |
+|---|---|---|
+| Capacité | **F2** pay-as-you-go = **0,423 €/h** (2 CU) | allumée en continu → **~ 305** ; réservée → **~ 183** |
+| | pausée agressivement (quelques h/mois) | fortement réduit, mais peu réaliste pour un entrepôt |
+| **Total** | | **≈ 180 – 305 €/mois** (capacité maintenue) |
+
+Lecture : un modèle **à l'usage** (Snowflake) reste bon marché sur un besoin intermittent ; un
+modèle **à la capacité** (Fabric) devient cher dès qu'on maintient l'instance allumée.
+
+**Raison documentée du non-retenu (contexte réel, année 2)** : arbitrage rendu **contre** la
+bascule SaaS pour un faisceau de raisons — **coût récurrent** au regard d'un besoin mensuel à
+faible intensité, **gouvernance des données** (santé et identité, sensibilité à la localisation et
+à la sortie du SI maîtrisé), **maturité des équipes** sur l'existant SQL Server, et **absence de
+gain décisif** sur une volumétrie que l'existant absorbait déjà. Décision collégiale (équipe data
++ DBA *gatekeeper*), sur critères coût / valeur / souveraineté. C'est le **matériau direct** de la
+question de jury sur le vendor lock-in.
+
+*Sources de prix (consultées pour le chiffrage)* : [Azure PostgreSQL Flexible Server —
+prix](https://azure.microsoft.com/en-us/pricing/details/postgresql/flexible-server/) et
+[comparatif Bytebase](https://www.bytebase.com/dbcost/azure-flexible-server-pricing/) ;
+[Snowflake pricing — Revefi 2026](https://www.revefi.com/blog/snowflake-pricing-guide) ;
+[Microsoft Fabric — prix Azure](https://azure.microsoft.com/en-us/pricing/details/microsoft-fabric/)
+et [analyse Agilytic](https://www.agilytic.com/blog/microsoft-fabric-pricing). Ordres de grandeur,
+région Europe, hors remises négociées.
 
 ### 5.5 Synthèse comparative
 
-| Critère | Local (retenu) | Cloud Azure | SaaS Snowflake/Fabric |
+| Critère | Local (retenu) | Cloud Azure | SaaS Snowflake / Fabric |
 |---|---|---|---|
-| Coût mensuel | ~ temps humain | 50 – 145 € | 80 – 250 € |
+| Coût mensuel | **~ 45 – 82 €** (temps humain) | ~ 30 – 90 € | Snowflake ~ 40 – 80 € · Fabric ~ 180 – 305 € |
 | Scalabilité | Faible | Élevée | Très élevée |
 | Haute disponibilité | Non | Oui | Oui |
 | Souveraineté / contrôle | **Total** | Partagé | Délégué |

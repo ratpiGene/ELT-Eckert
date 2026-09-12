@@ -5,14 +5,25 @@
 --   silver : données typées, nettoyées, dédoublonnées, conformes au contrat
 --   gold   : données exposées au métier (rapprochements, indicateurs)
 --
--- Modalités d'accès : elt_writer alimente, elt_reader consomme la couche gold
--- uniquement. Le métier n'a jamais accès au brut.
+-- Modalités d'accès (trois rôles, moindre privilège) :
+--   eckert_admin  administre les objets et les droits (DDL) — le DBA « gatekeeper »
+--   elt_writer    alimente (le pipeline)
+--   elt_reader    consomme la couche gold uniquement (le métier)
+-- Le métier n'a jamais accès au brut.
 -- ---------------------------------------------------------------------------
 
 CREATE SCHEMA IF NOT EXISTS bronze;
 CREATE SCHEMA IF NOT EXISTS silver;
 CREATE SCHEMA IF NOT EXISTS gold;
 CREATE SCHEMA IF NOT EXISTS ops;      -- journal technique, qualité, supervision
+
+-- Administration : le DBA « gatekeeper » du SI d'origine, reconstruit ici.
+-- Gère la structure (DDL) et les droits sur toutes les couches.
+GRANT ALL ON SCHEMA bronze, silver, gold, ops TO eckert_admin;
+ALTER DEFAULT PRIVILEGES IN SCHEMA bronze, silver, gold, ops
+    GRANT ALL ON TABLES TO eckert_admin;
+ALTER DEFAULT PRIVILEGES IN SCHEMA bronze, silver, gold, ops
+    GRANT ALL ON SEQUENCES TO eckert_admin;
 
 -- Écriture : le pipeline
 GRANT USAGE, CREATE ON SCHEMA bronze, silver, gold, ops TO elt_writer;

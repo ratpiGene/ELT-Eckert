@@ -33,7 +33,7 @@ l'incident que je rejouerai à la fin. »
 **Aborder** : besoins, contraintes, existant, les 4 compétences sans matériau.
 **À dire** : «Je vais découper cette analyse en 2 parties, pour isoler les besoins et contraintes côté entreprise et côté soutenance. Tout d'abord côté entreprise, il y a ce besoind d'avoir une donnée actionnable donc rapprochable avec notre référentiel pour détecter des correspondances, une donnée nettoyée pour être utilisable et finalement une donnée tracée et traçable pour justifier de potentielles actions, tout ça à échéance mensuelle pour coller aux dépots sur datagouv.
 
-Au niveau des contraintes, j'ai d'abord mis cout nul, ça cache surtout un besoin de souveraineté du fait de travailler avec des données personnelles de santé donc soumises à la RGPD et aussi un manque de compétence en interne sur des problématiques cloud, Saas, conformité qui ferait automatiquement exploser le budget d'un projet comme celui ci en forcant à déléguer ou recruter des profils cohérents. Ensuite il y avait le délai, un peu moins d'un mois suite à l'audit réalisé par les CACs l'idée étant surtout de montrer que le sujet est pris en main pas nécessairement d'avoir un produit abouti et mature à l'issue. Finalement une forte volumétrie, on parle d'environ 250k lignes par mois, ça peut paraitre ridicule mais jusqu'à présent la mutuelle n'avait pas à gérer des fluxs aussi importants avec une échéance aussi courte.
+Au niveau des contraintes, j'ai d'abord mis cout nul, ça cache surtout un besoin de souveraineté du fait de travailler avec des données personnelles de santé donc soumises à la RGPD et aussi un manque de compétence en interne sur des problématiques cloud, Saas, conformité qui ferait automatiquement exploser le budget d'un projet comme celui ci en forcant à déléguer ou recruter des profils cohérents. Ensuite il y avait le délai, un peu moins d'un mois suite à l'audit réalisé par les CACs l'idée étant surtout de montrer que le sujet est pris en main pas nécessairement d'avoir un produit abouti et mature à l'issue. Finalement une forte volumétrie, on parle d'environ 60k lignes par mois, ça peut paraitre ridicule mais jusqu'à présent la mutuelle n'avait pas à gérer des fluxs aussi importants avec une échéance aussi courte.
 
 Pour l'état des lieux de l'existant ici je vais surtout parler des technologies du SI qui pouvaient servir pour ce projet, tout d'abord l'entrepot de données SQL server en interne chez prévifrance, ce dernier alimente notre outil de gestion des contrats fourni par un prestataire et nous y avons greffé d'autres éléments au fil du temps. Ensuite SSRS et PBI au sein d'un portail décisionnel et opérationnel, la quasi totalité du reporting au sein de la mutuelle se fait de cette façon et finalement l'utilisation de Python et Airflow pour piloter le vrai traitement mis en place au sein de l'entreprise »
 
@@ -49,58 +49,72 @@ Pour l'état des lieux de l'existant ici je vais surtout parler des technologies
 Toutes exposent des interfaces standard S3, SQL, PySpark, l'idée ici était de répondre au besoin initial de souveraineté. Toute la solution peut tourner sur un serveur interne sans dépendre d'un tiers. J'ai fait le choix d'y greffer une contrainte cloud en essayant de traiter le vendor-lock-in. L'idée ici étant que ce choix de technologies ne crée par un frein majeur si un basculement cloud est envisagé par la suite. »
 
 ## Diapo 6 — Les coûts · C4.1.2 · (6:30)
-**Aborder** : les 3 scénarios chiffrés + le non-retenu réel.
-**À dire** : « Sur les coûts, mon objectif n'était pas de sortir un devis précis mais de poser une
-méthode avec des hypothèses assumées, parce que c'est surtout ça qu'on attend. J'ai comparé trois
-scénarios. Le local, celui que j'ai retenu : les logiciels sont gratuits, le serveur on l'a déjà,
-donc le vrai coût c'est mon temps d'exploitation. Le cloud managé Azure, j'arrive autour de 50 à
-145 € par mois. Et une plateforme SaaS type Snowflake ou Fabric, plutôt 80 à 250, très sensible à
-l'usage. Et ce dernier scénario n'est pas théorique : il a réellement été étudié en année 2 chez
-Prévifrance, puis écarté — pour le coût récurrent, mais surtout pour cette même souveraineté des
-données de santé, et parce qu'il n'apportait pas de gain décisif sur nos volumes. »
+**Aborder** : la méthode, le coût humain du local chiffré, le détail Azure/SaaS, le non-retenu réel.
+**À dire** : « Sur les coûts, je voulais surtout poser une méthode avec des hypothèses assumées.
+J'ai comparé trois scénarios, et j'insiste sur un point : même le scénario local n'est pas
+gratuit. Le logiciel l'est, le serveur on l'a déjà, mais il reste mon temps. Si je chiffre le coût
+chargé d'un alternant autour de 90 € la journée, ça fait une construction à peu près à 1 350 € en
+one-shot, et surtout une exploitation récurrente autour de 45 € par mois. Pour le cloud Azure, en
+détaillant les ressources — un PostgreSQL managé burstable, du stockage objet, Data Factory pour
+l'orchestration et un petit cluster Databricks à la demande — j'arrive autour de 30 à 90 € par
+mois selon que je laisse l'entrepôt allumé ou non. Pour le SaaS, tout dépend du modèle de
+facturation : Snowflake, à l'usage, reste entre 40 et 80 € ; mais Microsoft Fabric, qui facture à
+la capacité, grimpe vite à 180-300 € si on maintient l'instance allumée. Et ce dernier scénario
+n'est pas théorique : il a été étudié pour de vrai en année 2 chez Prévifrance, puis écarté — pour
+le coût récurrent, mais surtout pour la souveraineté des données de santé. »
 
 ## Diapo 7 — L'entrepôt · C4.2.1 · (9:00)
-**Aborder** : 4 couches, moindre privilège testé, vue métier.
-**À dire** : « Pour l'entrepôt, j'ai choisi une organisation en quatre couches. Le bronze, c'est
-la donnée brute telle que reçue, je n'y touche pas : ça me sert de filet et de traçabilité. Le
-silver, c'est le typé, le nettoyé, le dédoublonné. Le gold, c'est le résultat métier, la liste
-des contrats à instruire. Et une couche ops pour le journal technique. Là-dessus j'applique le
-moindre privilège avec deux rôles : le pipeline qui écrit, et le métier qui lit uniquement le
-gold. Et je ne me contente pas de le déclarer, je le teste : mon rôle de lecture, s'il essaie
+**Aborder** : 4 couches, **3 rôles dont l'administration (DBA)**, moindre privilège testé, vue métier.
+**À dire** : « Pour l'entrepôt, j'ai choisi une organisation en quatre couches : le bronze pour la
+donnée brute telle que reçue, qui me sert de filet et de traçabilité ; le silver pour le typé, le
+nettoyé, le dédoublonné ; le gold pour le résultat métier ; et une couche ops pour le journal
+technique. Côté accès, j'ai repris la logique du SI d'origine, où un DBA jouait le rôle de gardien.
+J'ai donc trois rôles, avec le moindre privilège. Un rôle d'administration, qui seul peut faire
+évoluer la structure et gérer les droits — c'est le gatekeeper. Un rôle d'écriture, pour le
+pipeline, qui alimente mais ne touche pas au schéma. Et un rôle de lecture, pour le métier, limité
+au gold. Et je ne me contente pas de le déclarer, je le teste : mon rôle de lecture, s'il essaie
 d'écrire dans le gold ou même de lire le brut, se fait refuser — c'est vérifié automatiquement. Le
-métier, lui, ne touche jamais aux tables directement, il passe par une vue déjà priorisée par
-niveau de confiance. »
+métier ne touche jamais aux tables directement, il passe par une vue déjà priorisée par niveau de
+confiance. »
 
 ## Diapo 8 — Trois méthodes de pipeline · C4.2.2 · (11:00)
-**Aborder** : annoncer les 3 méthodes (dont le distribué).
-**À dire** : « J'arrive sur le cœur technique. La compétence demande explicitement trois méthodes
-de traitement différentes, et j'ai tenu à ce que chacune produise vraiment une donnée. La
-première, c'est le fil de l'eau : dès qu'un fichier arrive, je le transforme en SQL, directement
-dans le moteur — le découpage, le typage, la déduplication. La deuxième, c'est l'orchestration
-avec Airflow, qui enchaîne et fiabilise les étapes. Et la troisième, c'est le calcul distribué
-avec Spark, pour le rapprochement, la partie la plus lourde. Je vais vous montrer les deux
-dernières en images. »
+**Aborder** : le choix **ELT (vs ETL)**, puis les 3 méthodes (dont le distribué).
+**À dire** : « J'arrive sur le cœur technique, les pipelines. Et d'abord un choix d'architecture :
+je fais de l'ELT, pas de l'ETL. La différence, c'est l'ordre. En ETL, on transforme la donnée
+avant de la charger. Moi je fais l'inverse : je charge d'abord la donnée brute — c'est mon bronze —
+et je transforme ensuite, à l'intérieur de l'entrepôt et de Spark. Ça m'apporte deux choses : je
+garde toujours la donnée source pour pouvoir rejouer, et je transforme au plus près de la donnée,
+là où c'est le plus efficace. Sur cette base, la compétence demande trois méthodes, et chacune
+produit vraiment une donnée : le fil de l'eau en SQL pour le typage et la déduplication,
+l'orchestration Airflow qui enchaîne et fiabilise, et le calcul distribué avec Spark pour le
+rapprochement. Je vous montre les deux dernières en images. »
 
 ## Diapo 9 — Orchestration (capture DAG) · C4.2.2 · (13:00)
-**Aborder** : le DAG réel vert sur le vrai fichier.
-**À dire** : « Voici le vrai DAG, tel qu'il tourne. Quatre tâches enchaînées : je récupère le
-catalogue sur data.gouv, je télécharge et je valide le fichier, je le charge en bronze, puis je
-le promeus en silver. Ce qui compte, ce n'est pas juste que ça s'enchaîne, c'est que c'est
-fiabilisé : des relances automatiques si une erreur est passagère, un SLA sur l'étape sensible, et
-des callbacks qui déclenchent une alerte si ça casse. Et c'est bien le vrai fichier INSEE qui
-passe, pas une simulation. »
+**Aborder** : le DAG réel vert + **le rôle de chacune des 4 tâches**.
+**À dire** : « Voici le vrai DAG, tel qu'il tourne, avec ses quatre tâches. La première interroge
+l'API de data.gouv pour repérer le bon fichier à récupérer. La deuxième le télécharge et le
+valide — c'est là que je vérifie le contrat de données, j'y reviendrai avec l'incident. La
+troisième charge le fichier brut dans le bronze, tel quel. Et la quatrième le promeut en silver :
+elle le découpe, le type et le dédoublonne. Au-delà de l'enchaînement, ce qui compte c'est la
+fiabilisation : des relances automatiques si une erreur est passagère, un SLA sur l'étape
+sensible, et des callbacks qui déclenchent une alerte si ça casse. Et c'est bien le vrai fichier
+INSEE qui passe, pas une simulation. »
 
 ## Diapo 10 — Distribué / Spark (capture) · C4.2.2 · (14:30)
-**Aborder** : le rapprochement, 3 niveaux, le résultat, la justification honnête de Spark.
-**À dire** : « Le rapprochement, lui, tourne sur un cluster Spark. Le principe : je croise le
-fichier des décès avec le référentiel des adhérents. Comme je n'ai pas d'identifiant national pour
-une correspondance parfaite, je travaille sur une clé nom–prénom–date de naissance, et je gradue
-le résultat en trois niveaux de confiance : certain, probable, et à vérifier pour les homonymes.
-Sur mon jeu de démonstration, ça remonte 4 162 contrats potentiellement en déshérence, dont 88
-millions d'euros au niveau certain. Et je veux être honnête sur un point qu'on va sûrement me
-poser : sur le volume d'un seul mois, un PostgreSQL bien indexé suffirait. Ce qui justifie Spark,
-c'est la volumétrie cumulée — des dizaines de millions de lignes sur l'historique — et la
-trajectoire si le périmètre grandit. C'est un choix dicté par la donnée, pas par la vitrine. »
+**Aborder** : partage **Postgres/Spark**, l'**INSEE partiel reconstruit** (comme le réel), 3 niveaux, Spark assumé.
+**À dire** : « Le rapprochement, c'est la partie distribuée, sur un cluster Spark. D'abord, qui
+fait quoi : toute la donnée vit dans PostgreSQL — les décès et le référentiel adhérents sont en
+silver. Spark, lui, ne stocke rien : il lit ces tables via JDBC, il fait la jointure de manière
+distribuée, et il réécrit le résultat dans le gold, toujours dans Postgres. Sur le principe
+métier, je reprends ce qu'on faisait dans le projet réel : je ne rapproche pas le fichier INSEE
+entier, je reconstruis un INSEE partiel, ciblé sur les identités qui nous concernent — dans ma
+plateforme ce jeu est synthétique et généré pour recouper le référentiel. Comme je n'ai pas
+d'identifiant national pour une correspondance parfaite, je travaille sur une clé
+nom-prénom-date de naissance, avec trois niveaux de confiance : certain, probable, et à vérifier
+pour les homonymes. Résultat : 4 162 contrats potentiellement en déshérence, dont 88 millions
+d'euros au niveau certain. Et je serai honnête sur la question qui vient toujours : sur le volume
+d'un seul mois, un Postgres bien indexé suffirait. Ce qui justifie Spark, c'est la volumétrie
+cumulée et la trajectoire si le périmètre grandit. »
 
 ## Diapo 11 — CI/CD + déploiement (capture) · C4.2.3 · (17:00)
 **Aborder** : les 5 jobs, le déploiement réel GHCR, le 1er run rouge assumé.

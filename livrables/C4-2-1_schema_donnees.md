@@ -116,18 +116,29 @@ supervision (C4.3.1).
 
 ## 4. Modalités d'accès et sécurité
 
-### 4.1 Deux rôles, principe du moindre privilège
+### 4.1 Trois rôles, principe du moindre privilège
+
+Trois rôles, calqués sur la séparation des responsabilités du SI d'origine (où un **DBA
+gatekeeper** tenait les accès et les objets) :
 
 | Rôle | Droit | Périmètre | Usage |
 |---|---|---|---|
+| `eckert_admin` | **ALL** (dont DDL : `CREATE`/`ALTER`/`DROP`) | bronze, silver, gold, ops | **administration** (le DBA « gatekeeper ») |
 | `elt_writer` | SELECT/INSERT/UPDATE/DELETE + USAGE séquences | bronze, silver, gold, ops | le **pipeline** |
 | `elt_reader` | SELECT **uniquement** | **gold seulement** | la **restitution métier** |
 
+Séparer l'**administration** (qui fait évoluer la structure) de l'**écriture** (qui alimente au
+quotidien) évite qu'un compte de traitement puisse modifier le schéma ou les droits : c'est le
+principe même du gatekeeper.
+
 ```sql
+-- Administration : gestion de la structure et des droits (DDL) sur toutes les couches
+GRANT ALL ON SCHEMA bronze, silver, gold, ops TO eckert_admin;
+ALTER DEFAULT PRIVILEGES IN SCHEMA bronze, silver, gold, ops GRANT ALL ON TABLES TO eckert_admin;
 -- Lecture métier : gold seulement
 GRANT USAGE ON SCHEMA gold TO elt_reader;
 ALTER DEFAULT PRIVILEGES IN SCHEMA gold GRANT SELECT ON TABLES TO elt_reader;
--- Refus explicite des couches techniques
+-- Refus explicite des couches techniques pour la lecture métier
 REVOKE ALL ON SCHEMA bronze, silver, ops FROM elt_reader;
 ```
 

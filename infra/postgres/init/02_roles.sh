@@ -1,8 +1,9 @@
 #!/bin/bash
 # Rôles applicatifs de l'entrepôt (C4.2.1 — sécurité / modalités d'accès).
-# Principe du moindre privilège : un rôle qui écrit, un rôle qui lit.
+# Moindre privilège, trois rôles : un qui administre, un qui écrit, un qui lit.
 set -e
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname eckert <<-EOSQL
+    CREATE ROLE eckert_admin LOGIN PASSWORD '${ELT_ADMIN_PASSWORD}';
     CREATE ROLE elt_writer LOGIN PASSWORD '${ELT_WRITER_PASSWORD}';
     CREATE ROLE elt_reader LOGIN PASSWORD '${ELT_READER_PASSWORD}';
 EOSQL

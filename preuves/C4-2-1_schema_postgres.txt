@@ -1,5 +1,5 @@
 # C4.2.1 — Schémas, rôles et tables de l'entrepôt eckert
-# Généré le 2026-09-10T19:42:12Z — docker exec eckert-postgres psql
+# Généré le 2026-09-12T15:13:39Z
 
       List of schemas
   Name  |       Owner       
@@ -11,12 +11,13 @@
  silver | postgres
 (5 rows)
 
-                              List of roles
- Role name  |                         Attributes                         
-------------+------------------------------------------------------------
- elt_reader | 
- elt_writer | 
- postgres   | Superuser, Create role, Create DB, Replication, Bypass RLS
+                               List of roles
+  Role name   |                         Attributes                         
+--------------+------------------------------------------------------------
+ eckert_admin | 
+ elt_reader   | 
+ elt_writer   | 
+ postgres     | Superuser, Create role, Create DB, Replication, Bypass RLS
 
            List of relations
  Schema |    Name    | Type  |  Owner   
