@@ -95,6 +95,12 @@ Les canaux sont configurés par variables d'environnement (`ALERT_WEBHOOK_URL`,
 `ALERT_EMAIL_TO`) : **aucun secret dans le code**, et l'envoi réel se désactive en laissant la
 variable vide (mode local/démonstration).
 
+**L'alerte est réellement délivrée, pas seulement codée.** Le DAG `eckert_demo_alerte` provoque
+un échec ; son `on_failure_callback` écrit une ligne `ECHEC` dans `ops.journal_execution` **et**
+envoie un POST au webhook, **reçu** avec titre, corps (DAG, tâche, tentative, erreur, lien vers
+le journal) et **destinataire** — capture `preuves/C4-3-1_alerte_webhook.txt`. Les deux canaux
+(trace + notification) sont donc prouvés bout en bout.
+
 ---
 
 ## 5. Visualisation
@@ -105,8 +111,9 @@ variable vide (mode local/démonstration).
   (taux de rejet dans le temps, volumétrie par exécution, alertes de métadonnées). Exploitable
   directement en SQL, ou branché sur Metabase (même rôle lecture seule).
 
-**Preuve** : `preuves/C4-3-1_airflow_grid.png` (Grid view), `preuves/C4-3-1_journal_ops.txt`
-(extrait du journal), `preuves/C4-3-1_alerte_echec.png` (alerte sur échec provoqué).
+**Preuve** : `preuves/C4-3-1_airflow_eventlog.png` (Event Log, retry visible),
+`preuves/C4-3-1_journal_ops.txt` (extrait du journal), `preuves/C4-3-1_alerte_webhook.txt`
+(alerte réellement délivrée au destinataire sur échec provoqué).
 
 ---
 
@@ -125,6 +132,6 @@ d'infra est décrit dans `LIMITES.md` comme évolution.
 |---|---|---|
 | **Éléments et indicateurs** surveillés | §1, §2 | `ops.journal_execution` |
 | **Choix et configuration** des outils | §3 | `dags/eckert_ingestion.py` |
-| **Visualisation** | §5 | `preuves/C4-3-1_airflow_grid.png` |
+| **Visualisation** | §5 | `preuves/C4-3-1_airflow_eventlog.png` |
 | Système d'**alertes** (seuils) | §2, §4 | seuils dans `contract.py` |
-| Alertes : **canaux, destinataires, escalade** | §4 | `src/eckert/supervision/alerte.py` |
+| Alertes : **canaux, destinataires, escalade** | §4 | `preuves/C4-3-1_alerte_webhook.txt` (alerte délivrée) |

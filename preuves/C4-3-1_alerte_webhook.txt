@@ -1,0 +1,22 @@
+# C4.3.1 — Preuve de DÉLIVRANCE d'une alerte (pas seulement codée)
+#
+# Dispositif : un récepteur de webhook (tools/webhook_receiver.py) écoute sur le
+# port 9099 de l'hôte. Airflow est configuré avec ALERT_WEBHOOK_URL pointant vers
+# lui. Le DAG eckert_demo_alerte contient une tâche qui échoue volontairement ;
+# son on_failure_callback (eckert.supervision.alerte.alerter_echec) journalise
+# l'échec en base ET envoie la notification ci-dessous.
+#
+# Résultat : l'alerte a bien été REÇUE par le destinataire. Contenu exact reçu :
+
+===== ALERTE REÇUE 2026-09-10T20:36:18+00:00 =====
+POST /
+{
+  "titre": "[ECKERT] Échec eckert_demo_alerte.echec_provoque",
+  "corps": "DAG eckert_demo_alerte — tâche echec_provoque en échec (tentative 1).\nExécution : manual__2026-09-10T20:36:16+00:00\nErreur : Échec provoqué pour démonstration du système d'alertes (C4.3.1).\nJournal : http://localhost:8080/dags/eckert_demo_alerte/grid?dag_run_id=manual__2026-09-10T20:36:16+00:00&task_id=echec_provoque&tab=logs",
+  "destinataire": "data-eckert@example.local"
+}
+
+# Le champ "destinataire" matérialise le critère « destinataires » ; le titre et
+# le corps, le canal de notification ; le lien "Journal" permet le diagnostic.
+# En parallèle, une ligne ECHEC est écrite dans ops.journal_execution
+# (cf. C4-3-1_journal_ops.txt) : trace + notification, les deux canaux.

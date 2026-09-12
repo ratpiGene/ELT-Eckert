@@ -24,9 +24,10 @@ Une preuve par critère, rattachée à sa compétence. Deux natures :
 | C4.2.3 | CI/CD verte (jobs) | `preuves/C4-2-3_ci_jobs.txt` | ✅ [texte] |
 | C4.2.3 | CI/CD verte (capture, run #4 Success) | `preuves/C4-2-3_ci_run_vert.png` | ✅ [capture] |
 | C4.2.3 | Scan de dépendances | `preuves/C4-2-3_pip_audit.txt` | ✅ [texte] |
+| C4.2.3 | Déploiement : image publiée sur GHCR | `preuves/C4-2-3_deploiement_ghcr.png` | ⏳ [capture] onglet Packages du dépôt |
 | C4.3.1 | Airflow Event Log (enchaînement + retry visible) | `preuves/C4-3-1_airflow_eventlog.png` | ✅ [capture] |
 | C4.3.1 | Journal d'exécution `ops` | `preuves/C4-3-1_journal_ops.txt` | ✅ [texte] |
-| C4.3.1 | Alerte sur échec provoqué | `preuves/C4-3-1_alerte_echec.png` | ⏳ [capture] |
+| C4.3.1 | Alerte réellement délivrée au webhook (titre+corps+destinataire) | `preuves/C4-3-1_alerte_webhook.txt` | ✅ [texte] |
 | C4.4.1 | Cahier de recette exécuté (19 tests) | `preuves/C4-4-1_recette_complete.txt` | ✅ [texte] |
 | C4.4.1 | Tests de sécurité (base réelle) | `preuves/C4-4-1_tests_securite.txt` | ✅ [texte] |
 | C4.4.2 | Rejeu de l'incident (avant/après) | `preuves/C4-4-2_incident_rejeu.txt` | ✅ [texte] |

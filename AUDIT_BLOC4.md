@@ -69,11 +69,11 @@ mais un angle reste déclaratif) · **NA** = Non Acquis.
 | Critère | Verdict | Justification |
 |---|---|---|
 | Automatise l'intégration | **A** | 3 jobs (qualité, tests, sécurité) verts, `C4-2-3_ci_jobs.txt` |
-| Automatise le déploiement | **A/r** | job `deploiement` = build + vérification d'image. **Réserve** : pas de mise en service sur un environnement cible (assumé `LIMITES.md`). Le terme « déploiement » est couvert au sens construction/publication d'artefact, pas livraison en prod |
+| Automatise le déploiement | **A** | job `deploiement` : build → **push sur GHCR** (`ghcr.io/ratpigene/eckert-elt:<sha>` + `latest`) → **pull depuis le registre** + smoke test. Déploiement d'artefact réel, tous les steps verts (run #6) |
 | Fichier de workflow | **A** | `.github/workflows/ci.yml` |
-| Capture d'exécution réelle | **A** | `C4-2-3_ci_run_vert.png` (run #4, 5 jobs Success) |
+| Capture d'exécution réelle | **A** | `C4-2-3_ci_run_vert.png` (5 jobs Success) + `C4-2-3_deploiement_ghcr.png` (image publiée) |
 
-**Verdict compétence : A/r → A à l'oral si assumé clairement.** C'est **le seul critère où un jury exigeant pourrait tiquer** : « déployer » vs « construire l'image ». La réserve est honnête et documentée ; à dire explicitement en soutenance.
+**Verdict compétence : A.** Réserve levée : l'image est **publiée sur un registre et revérifiée par pull**, récupérable par tout consommateur. Reste une limite honnête (pas de mise en service auto sur un cluster cible), assumée `LIMITES.md`.
 
 ---
 
@@ -85,9 +85,9 @@ mais un angle reste déclaratif) · **NA** = Non Acquis.
 | Choix / configuration des outils | **A** | §3 (callbacks, SLA, retries) dans le DAG |
 | Visualisation | **A** | Airflow Grid/Event Log (`C4-3-1_airflow_eventlog.png`, retry visible) |
 | Système d'alertes : seuils | **A** | seuils centralisés (`TAUX_REJET_MAX`, `LIGNES_MINIMUM`) |
-| Alertes : canaux / destinataires / escalade | **A/r** | §4 : journal→webhook→courriel codés. **Réserve** : la *délivrance* d'une alerte n'est pas capturée (webhook vide en démo) ; le chemin d'échec est prouvé (journal ECHEC) mais pas la notification reçue |
+| Alertes : canaux / destinataires / escalade | **A** | §4 : journal→webhook→courriel. **Alerte réellement délivrée** capturée (`C4-3-1_alerte_webhook.txt`) : titre + corps + destinataire, sur échec provoqué du DAG `eckert_demo_alerte` |
 
-**Verdict compétence : A.** Mécanisme complet et configuré. **Réserve** : une preuve d'alerte réellement délivrée (webhook de test) solidifierait le critère « destinataires ».
+**Verdict compétence : A.** Réserve levée : la notification est **délivrée et capturée** (webhook reçu), en plus de la trace `ECHEC` en base. Les deux canaux sont prouvés bout en bout.
 
 ---
 
@@ -154,25 +154,27 @@ mais un angle reste déclaratif) · **NA** = Non Acquis.
 | C4.1.2 Composants / coûts | **A** |
 | C4.2.1 Entrepôt | **A** |
 | C4.2.2 Pipelines (×3) | **A** |
-| C4.2.3 CI/CD | **A/r** |
-| C4.3.1 Supervision | **A** (réserve mineure) |
+| C4.2.3 CI/CD | **A** |
+| C4.3.1 Supervision | **A** |
 | C4.3.2 Exploitation | **A** |
 | C4.3.3 Documentation | **A** |
 | C4.4.1 Recette | **A** |
 | C4.4.2 Incident | **A** |
 
-### Verdict global : **le bloc se valide.**
+### Verdict global : **le bloc se valide — 10 compétences Acquises, sans réserve.**
 
 Les dix compétences sont couvertes par un livrable **et** une preuve tangible. La plateforme
 tourne réellement (DAG réel vert, Spark FINISHED, CI verte, sécurité testée), ce qui fait passer
 six compétences du déclaratif au démontré.
 
-### Deux réserves à connaître (non bloquantes, déjà dans `LIMITES.md`)
+### Les deux réserves de la première passe ont été levées
 
-1. **C4.2.3 « déploiement »** : limité à la construction/vérification de l'image, pas de mise en
-   service sur un environnement cible. À **assumer explicitement à l'oral**.
-2. **C4.3.1 « destinataires d'alerte »** : les canaux sont codés mais aucune alerte réellement
-   *délivrée* n'est capturée (webhook désactivé en démo).
+1. **C4.2.3 « déploiement »** — **levée** : le job publie désormais l'image sur GHCR
+   (`ghcr.io/ratpigene/eckert-elt`) et la revérifie par `docker pull` + smoke test. Reste une
+   limite honnête (pas de mise en service auto sur cluster cible), assumée `LIMITES.md`.
+2. **C4.3.1 « destinataires d'alerte »** — **levée** : une alerte réellement délivrée est
+   capturée (`preuves/C4-3-1_alerte_webhook.txt`), avec titre, corps et destinataire, en plus de
+   la trace `ECHEC` en base.
 
 ### Risque résiduel principal
 
