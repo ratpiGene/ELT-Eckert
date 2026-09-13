@@ -83,6 +83,15 @@ rapprochement. Je vais pouvoir vous montrer quelques captures d'écrans pour les
 
 Ce qui compte avant tout c'est la fiabilisation, on a donc des relances automatiques en cas d'erreur, un SLA et des callbacks pour déclencher des alertes si ça casse. Là en l'occurence j'ai pu lancer ce DAG de mon côté sur les données de data.gouv donc on est sur un vrai traitement pas une simulation. »
 
+**Détail MinIO — bloc séparé (à dire si le jury demande « où/quand intervient MinIO ? », ou à glisser à ta main)** :
+« MinIO, c'est mon stockage objet, la couche bronze "fichiers". Concrètement : dès qu'un fichier
+arrive, avant tout traitement, je le dépose tel quel dans un bucket, avec un manifeste — sa
+taille, son empreinte, l'exécution qui l'a produit. C'est mon archive immuable et versionnée de la
+source : si je dois rejouer un traitement, je repars du fichier exact reçu, pas d'une copie
+retravaillée. La table bronze de Postgres, elle, contient les lignes de ce fichier pour le
+traitement SQL. En résumé : MinIO garde le fichier, Postgres garde les lignes. Et comme MinIO
+expose une API S3 standard, une bascule vers un stockage objet cloud se ferait sans réécriture. »
+
 ## Diapo 10 — Distribué / Spark (capture) · C4.2.2 · (14:30)
 **Aborder** : partage **Postgres/Spark**, l'**INSEE partiel reconstruit** (comme le réel), 3 niveaux, Spark assumé.
 **À dire** : « On a parlé d'orchestration, je vais maintenant pouvoir vous parler du rapprochement INSEE/référentiel métier qui consititue la partie distribuée du projet. Cette distribution elle se fait via un cluster Spark, toute la donnée vit dans PostgreSQL, le référentiel comme la donnée INSEE sont en silver. Spark ne stocke rien, il lit juste les tables via JDBC qui fait office de connecteur. Ensuite il fait la jointure de maniètre distribuée et il réécrit le résultat en gold toujours dans Postgres. Sur le principe métier je reprends ce qui est fait côté entreprise, reconstruction d'un pseudo INSEE via date de naissance, sexe, commune de naissance etc. De mon côté dans la mesure ou le Faker me génère des valeurs aléatoires j'ai déporté le rapprochement sur d'autres critères pour avoir quelques correspondances facilement.
