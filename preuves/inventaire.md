@@ -17,7 +17,7 @@ Une preuve par critère, rattachée à sa compétence. Deux natures :
 | C4.2.1 | Schémas, rôles, tables de l'entrepôt | `preuves/C4-2-1_schema_postgres.txt` | ✅ [texte] |
 | C4.2.1 | Restitution métier lue par `elt_reader` | `preuves/C4-2-1_vue_restitution.txt` | ✅ [texte] |
 | C4.2.1 | Couche bronze objet MinIO (fichiers bruts + manifeste) | `preuves/C4-2-1_minio_bronze.txt` | ✅ [texte] |
-| C4.2.1 | Console MinIO (bucket `eckert-bronze`) | `preuves/C4-2-1_minio_console.png` | ⏳ [capture] http://localhost:9001 |
+| C4.2.1 | Console MinIO (bucket `eckert-bronze` : fichier + manifeste + dépôt orchestré) | `preuves/C4-2-1_minio_console.png` | ✅ [capture] |
 | C4.2.2 | Résultats gold par niveau de confiance | `preuves/C4-2-2_gold_par_confiance.txt` | ✅ [texte] |
 | C4.2.2 | Exécution du job Spark (cluster) | `preuves/C4-2-2_spark_execution.txt` | ✅ [texte] |
 | C4.2.2 | Spark UI (application `eckert-rapprochement` FINISHED) | `preuves/C4-2-2_spark_ui.png` | ✅ [capture] |
