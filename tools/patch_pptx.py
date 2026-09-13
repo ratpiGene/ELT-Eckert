@@ -35,10 +35,16 @@ PUCES = {
         "Le métier consomme une vue déjà priorisée",
     ],
     "Trois méthodes de pipeline": [
-        "Choix ELT : charger le brut, puis transformer (rejouabilité + au plus près)",
+        "Choix ELT : le brut d'abord (fichiers → MinIO objet, lignes → Postgres), transfo ensuite",
         "Fil de l'eau (SQL) : typage, nettoyage, déduplication",
         "Orchestration (Airflow) : enchaîne et fiabilise",
         "Distribué (Spark) : absorbe le volume du rapprochement",
+    ],
+    "Bilan : ce qui tourne": [
+        "Chaîne complète prouvée : ingestion → MinIO → Spark → gold → restitution",
+        "Sécurité testée · CI verte · incident rejoué",
+        "Limites : Postgres unique · Spark lancé manuellement · supervision applicative",
+        "À poursuivre : Spark via Airflow · supervision infra (Prometheus/Grafana + exporteurs)",
     ],
     "Orchestration : le DAG réel": [
         "4 tâches : catalogue data.gouv → validation contrat → bronze → silver",

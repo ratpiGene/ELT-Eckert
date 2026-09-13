@@ -83,12 +83,27 @@ def eckert_ingestion_deces():
     def telecharger_et_valider(ressources: list[dict], **contexte) -> list[str]:
         """Télécharge puis valide le CONTENU. Un fichier non conforme échoue ici."""
         from eckert.ingestion.datagouv import RessourceDeces
+        from eckert.ingestion.stockage_objet import deposer
 
         fichiers_valides: list[str] = []
         for brut in ressources:
             ressource = RessourceDeces(**brut)
             destination = REPERTOIRE_TRAVAIL / f"{ressource.annee}" / ressource.titre
             resultat = telecharger(ressource, destination)
+
+            # Couche bronze objet : on archive le fichier brut reçu (+ manifeste)
+            # dans MinIO avant tout traitement — l'archive versionnée de la source.
+            uri = deposer(
+                resultat.chemin,
+                cle=f"brut/{ressource.annee}/{ressource.titre}",
+                run_id=contexte["run_id"],
+            )
+            journaliser(
+                run_id=contexte["run_id"],
+                etape=f"archive_minio_{ressource.annee}",
+                statut="SUCCES",
+                message=uri,
+            )
 
             for alerte in controler_metadonnees(resultat.ecarts, ressource.anomalies_metadonnees()):
                 journaliser(

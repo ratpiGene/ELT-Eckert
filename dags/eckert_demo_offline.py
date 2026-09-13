@@ -42,6 +42,21 @@ ARGUMENTS_DEFAUT = {
 )
 def eckert_demo_offline():
     @task
+    def archiver_minio(**contexte) -> str:
+        """Dépose le fichier brut reçu dans MinIO (couche bronze objet) + manifeste."""
+        from eckert.ingestion.stockage_objet import deposer
+
+        if not FICHIER_DEMO.exists():
+            raise AirflowFailException(f"Fichier de démonstration absent : {FICHIER_DEMO}.")
+        uri = deposer(
+            FICHIER_DEMO,
+            cle=f"brut/demo/{contexte['run_id']}/{FICHIER_DEMO.name}",
+            run_id=contexte["run_id"],
+        )
+        journaliser(run_id=contexte["run_id"], etape="archiver_minio", statut="SUCCES", message=uri)
+        return uri
+
+    @task
     def charger_bronze(**contexte) -> int:
         from eckert.transform.charge_bronze import charger
 
@@ -74,7 +89,10 @@ def eckert_demo_offline():
         )
         return total
 
-    promouvoir_silver(charger_bronze())
+    archive = archiver_minio()
+    bronze = charger_bronze()
+    archive >> bronze
+    promouvoir_silver(bronze)
 
 
 eckert_demo_offline()

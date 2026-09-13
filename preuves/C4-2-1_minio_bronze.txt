@@ -1,0 +1,15 @@
+# C4.2.1/C4.2.2 — Couche bronze objet MinIO : fichiers bruts archivés + manifeste
+# Bucket eckert-bronze — 2026-09-13T13:35:51Z
+
+[2026-09-13 13:30:23 UTC] 739KiB STANDARD brut/demo/deces-demo.txt
+[2026-09-13 13:30:23 UTC]   173B STANDARD brut/demo/deces-demo.txt.manifest.json
+[2026-09-13 13:35:04 UTC] 739KiB STANDARD brut/demo/manual__2026-09-13T13:35:02+00:00/deces-demo.txt
+[2026-09-13 13:35:04 UTC]   224B STANDARD brut/demo/manual__2026-09-13T13:35:02+00:00/deces-demo.txt.manifest.json
+--- manifeste ---
+{
+  "cle": "brut/demo/deces-demo.txt",
+  "fichier": "deces-demo.txt",
+  "taille_octets": 756969,
+  "run_id": "demo_local_minio",
+  "depose_le": "2026-09-13T13:30:23+00:00"
+}

@@ -70,6 +70,13 @@ Choix : **aucune interprétation** en bronze. On stocke la ligne brute + sa prov
 de doute sur une donnée gold, on remonte jusqu'à la ligne source exacte (`run_id`,
 `ligne_numero`). L'index sur `run_id` sert la promotion incrémentale (une exécution à la fois).
 
+**Le bronze a deux étages.** Avant même le relationnel, le **fichier brut reçu** est archivé
+tel quel dans **MinIO** (stockage objet S3-compatible), avec un **manifeste** (taille, empreinte,
+`run_id`) — c'est l'archive immuable et versionnée de la source, qui garantit qu'on peut toujours
+rejouer depuis le fichier exact reçu. La table `bronze.deces_brut`, elle, porte les *lignes* de ce
+fichier. Le dépôt objet est réalisé à l'ingestion (`src/eckert/ingestion/stockage_objet.py`,
+appelé par le DAG) ; preuve `preuves/C4-2-1_minio_bronze.txt`.
+
 ### 3.2 Silver — typage, nettoyage, déduplication
 
 `silver.deces` porte les champs typés (dates en `DATE`, sexe en `SMALLINT`) et une
